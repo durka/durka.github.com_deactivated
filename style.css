@@ -1,4 +1,14 @@
-#title
+.title
+{
+	font-size: 20pt
+}
+
+.subtitle
 {
 	font-size: 15pt
+}
+
+#left_sidebar
+{
+	float: left	
 }
