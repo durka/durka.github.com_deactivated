@@ -19,6 +19,7 @@ body, div
 	position: absolute;
 	left: 0px;
 	width: 20%;
+	height: 100%;
 	background: red /* left sidebar */
 }
 
@@ -27,6 +28,7 @@ body, div
 	position: absolute;
 	right: 0px;
 	width: 20%;
+	height: 100%;
 	background: blue /* right sidebar */
 }
 
