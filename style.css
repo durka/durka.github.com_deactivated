@@ -14,14 +14,19 @@ body, div
 	font-size: 15pt
 }
 
+#main1
+{
+	height: 70%
+}
+
 #left
 {
 	position: absolute;
 	float: left;
 	left: 0px;
 	width: 20%;
-	height: 100%;
-	background: red /* left sidebar */
+	height: 70%;
+	background: red
 }
 
 #right
@@ -30,8 +35,8 @@ body, div
 	float: right;
 	right: 0px;
 	width: 20%;
-	height: inherit;
-	background: blue /* right sidebar */
+	height: 70%;
+	background: blue
 }
 
 #middle
@@ -39,6 +44,7 @@ body, div
 	position: relative;
 	left: 20%;
 	width: 60%;
+	height: 70%;
 	background: yellow
 }
 
