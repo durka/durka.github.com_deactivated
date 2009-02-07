@@ -51,6 +51,16 @@ body, div
 	overflow: auto
 }
 
+#middle a
+{
+	color: #adff2f
+}
+
+#middle a:visited
+{
+	color: #b8860b
+}
+
 .column_in
 {
 	margin: 0;
