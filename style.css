@@ -16,6 +16,7 @@ body, div
 
 #main1_in
 {
+	position: absolute;
 	left: 0px;
 	width: 20%;
 	background: red /* left sidebar */
@@ -23,6 +24,7 @@ body, div
 
 #main2_in
 {
+	position: absolute;
 	right: 0px;
 	width: 20%;
 	background: blue /* right sidebar */
