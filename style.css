@@ -28,7 +28,7 @@ body, div
 	position: absolute;
 	right: 0px;
 	width: 20%;
-	height: 100%;
+	height: inherit;
 	background: blue /* right sidebar */
 }
 
