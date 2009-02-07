@@ -1,6 +1,10 @@
 <html>
 	<head>
-		<title>{{ page.title }} - (map *prn* thoughts)</title>
+		{% if post %}
+			<title>{{ page.title }} - (map *prn* thoughts)</title>
+		{% else %}
+			<title>{{ page.title }}</title>
+		{% endif %}
 	</head>
 	<body>
 		<div id="post">

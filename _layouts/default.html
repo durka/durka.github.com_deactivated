@@ -1,7 +1,11 @@
 <html>
 	<head>
-		<title>{{ page.title }}</title>
-		<link rel="stylesheet" href="style.css"/>
+		{% if post %}
+			<title>{{ page.title }} - (map *prn* thoughts)</title>
+		{% else %}
+			<title>{{ page.title }}</title>
+		{% endif %}
+		<link rel="stylesheet" href="http://durka.github.com/style.css"/>
 	</head>
 	<body>
 		<div id="title">
@@ -35,6 +39,12 @@
 			<div id="middle">
 				<div class="column_in">
 					{{ content }}
+					{% if post %}
+						<div id="comments">
+							<span id="IDCommentsPostTitle" style="display:none"></span>
+							<script type='text/javascript' src='http://www.intensedebate.com/js/genericCommentWrapperV2.js'></script>
+						</div>
+					{% endif %}
 				</div>
 			</div>
 

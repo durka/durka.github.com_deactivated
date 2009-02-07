@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Test Post
+post: true
 ---
 
 This is, like, a test post or something.
