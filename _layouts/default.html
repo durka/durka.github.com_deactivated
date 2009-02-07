@@ -1,6 +1,6 @@
 <html>
 	<head>
-		{% if post %}
+		{% if is_post %}
 			<title>{{ page.title }} - (map *prn* thoughts)</title>
 		{% else %}
 			<title>{{ page.title }}</title>
@@ -39,7 +39,7 @@
 			<div id="middle">
 				<div class="column_in">
 					{{ content }}
-					{% if post %}
+					{% if is_post %}
 						<div id="comments">
 							<span id="IDCommentsPostTitle" style="display:none"></span>
 							<script type='text/javascript' src='http://www.intensedebate.com/js/genericCommentWrapperV2.js'></script>
