@@ -47,7 +47,8 @@ body, div
 	width: 60%;
 	height: 100%;
 	background: #000080;
-	color: white
+	color: white;
+	overflow: auto
 }
 
 .column_in
