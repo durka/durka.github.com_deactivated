@@ -14,13 +14,17 @@ body, div
 	font-size: 15pt
 }
 
-#main1
+#main1_in
 {
+	left: 0px;
+	width: 20%;
 	background: red /* left sidebar */
 }
 
-#main2
+#main2_in
 {
+	right: 0px;
+	width: 20%;
 	background: blue /* right sidebar */
 }
 
