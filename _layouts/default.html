@@ -13,9 +13,14 @@
 		<div id="main1">
 			<div id="left">
 				<div class="column_in">
-					<span class="subtitle">
+					<div class="subtitle">
 						(keys *thoughts*)
-					</span>
+					</div>
+					<ul>
+						{% for post in site.posts %}
+						<li><a href="{{ post.url }}">{{ post.title }}</a></li>
+						{% endfor %}
+					</ul>
 				</div>
 			</div>
 
