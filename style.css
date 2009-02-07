@@ -38,6 +38,7 @@ body, div
 {
 	position: relative;
 	left: 20%;
+	width: 60%;
 	background: yellow
 }
 
