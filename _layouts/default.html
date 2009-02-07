@@ -4,18 +4,46 @@
 		<link rel="stylesheet" href="style.css"/>
 	</head>
 	<body>
-		<div class="title">
-			(map prn *thoughts*)
+		<div id="title">
+			<div class="column_in">
+				(map prn *thoughts*)
+			</div>
 		</div>
 
-		<div id="left_sidebar">
-			<span class="subtitle">
-				(keys *thoughts*)
-			</span>
+		<div id="main1">
+			<div id="main2">
+
+				<div id="left">
+					<div class="column_in">
+						<span class="subtitle">
+							(keys *thoughts*)
+						</span>
+					</div>
+				</div>
+
+				<div id="right">
+					<div class="column_in">
+						<span class="subtitle">
+							(meta *thoughts*)
+						</span>
+					</div>
+				</div>
+
+				<div id="middle">
+					<div class="column_in">
+						{{ content }}
+					</div>
+				</div>
+
+				<div id="cleaner">&nbsp;</div>
+
+			</div>
 		</div>
 
-		<div id="content">
-			{{ content }}
+		<div id="footer">
+			<div class="column_in">
+				I'll think of something to put here.
+			</div>
 		</div>
 	</body>
 </html>

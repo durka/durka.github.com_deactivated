@@ -1,4 +1,10 @@
-.title
+body, div
+{
+	margin: 0;
+	padding: 0;
+}
+
+#title
 {
 	font-size: 20pt
 }
@@ -8,7 +14,42 @@
 	font-size: 15pt
 }
 
-#left_sidebar
+#main1
 {
-	float: left	
+	background: red /* left sidebar */
+}
+
+#main2
+{
+	background: blue /* right sidebar */
+}
+
+#left
+{
+	float: left
+}
+
+#right
+{
+	float: right
+}
+
+#middle
+{
+	background: yellow
+}
+
+.column_in
+{
+	margin: 0;
+	padding: 0.5em 1em
+}
+
+#cleaner
+{
+	clear: both;
+	height: 1px;
+	font-size: 1px;
+	border: none;
+	background: transparent
 }
