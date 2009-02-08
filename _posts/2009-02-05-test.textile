@@ -1,7 +1,0 @@
----
-layout: default
-title: Test Post
-is_post: true
----
-
-This is, like, a test post or something.
