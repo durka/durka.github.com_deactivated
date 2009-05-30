@@ -1,0 +1,7 @@
+---
+layout: default
+title: Using Data from the New York Times for Fun and Profit
+is_post: true
+---
+
+The New York Times has a lot of data. Even if 79.243% of their statistics are made up on the spot by writers, they need lots of numbers to generate the other 20.757%. The fun part is that they are making some of this data available as an "API":http://developer.nytimes.com/, for anyone who wants to sign up for (free) API key and follow their instructions for constructing URLs. Okay, so I may or may not have lied about the profit part.
