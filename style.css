@@ -60,7 +60,9 @@ body, div
 	height: 100%;
 	background: #000080;
 	color: white;
-	overflow: auto
+	overflow: auto;
+    font-family: Verdana;
+    font-size: 9.5pt
 }
 
 #middle a
@@ -90,11 +92,16 @@ body, div
 
 .gist-file
 {
-    font-size: 10pt !important
+    font-size: 9pt !important
 }
 
 .gist-meta
 {
     background-color: #000080 !important;
     color: white !important
+}
+
+.footnote a
+{
+    text-decoration: none
 }
