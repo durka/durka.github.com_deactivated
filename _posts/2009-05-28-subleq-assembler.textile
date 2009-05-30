@@ -1,0 +1,98 @@
+---
+layout: default
+title: Back to Basics
+is_post: true
+---
+
+So, welcome to my blog about Clojure and programming in general! Join me as I juggle parentheses with one hand while battling Textile[0] with the other. This being the first post, the comments section is open to any and all blog meta-comments as well as opinions on this entry in particular.
+
+In this post I plan to walk through my implementation of a very simple language in Clojure. It's an assembly language, for a hypothetical processor, but it's special because this processor is an OISC(One Instruction Set Computer) -- it does one thing, and one thing only, over and over again. But it turns out that this type of machine can be made Turing complete. I will attempt to explain how to program for this CPU and walk through the development of my assembler and simulator at the same time.
+
+I chose the SUBLEQ instruction, which stands for "SUbtract and Branch if Less than or EQual to zero." The instruction takes three arguments -- we'll call them A, B, and C, and they are memory addresses. First, the value at A is subtracted from the value at B (and stored in B). Then, the value at B is tested, and if it is less than or equal to zero, the program branches to C (otherwise, execution just passes on to the next instruction). Following this probably dismal prose explanation, I submit a version in C and a diagram (and stay tuned for the Clojure implementation, of course).
+
+<pre>
+subleq A B C
+</pre>
+<script src="http://gist.github.com/119633.js"></script>
+The diagram below shows part of the machine's memory as a linear sequence of cells, before and after the SUBLEQ takes effect. Above and below the cells are labels referring to their addresses, and the values are inside.
+!/media/subleq.png!
+There is an interesting question of what to do with negative numbers; I have taken the convention from "Lawrence Woodman":http://techtinkering.com/articles/?id=26 that giving a negative number for an operand adds a layer of indirection: in other words, if A is negative, use Mem[Mem[|A|]] instead of Mem[A].
+<script src="http://gist.github.com/119642.js"></script>
+!/media/subleq_neg.png!
+In this last diagram I have given a negative value for the third operand, causing the conditional jump to the address in box C, rather than to the address C.
+
+So you can see that this instruction is quite powerful. There are a few idioms that come out quickly:
+* For an unconditional jump, give the same address for A and B, because x - x is always zero.
+* To not jump at all, give the address of the next instruction for C. (This is so common that there is syntactic sugar for it in the assembler -- just leave out C.)
+* To transfer a value from one place to another, use a memory cell that contains zero as the middleman.
+** Clearing a cell is as easy as passing it for both A and B.
+** To do the transfer this way, subtract the original from the zero cell, then subtract the zero cell from the target.
+** If the target cell doesn't contain zero, this is also how you add numbers.
+* There are of course more -- I leave discovering them as an exercise to the reader.
+
+The first design decision is how to lay out the memory in this machine. I made some rather odd decisions that I may changes in the future, but for now this diagram shows the structure:
+!/media/machine.png!
+The assembled code of the program goes in the beginning of the memory. Immediately after that are the input and output ports, and after that the rest of the memory is filled with increasing integers. Now, IN and OUT are very special (almost magical) memory cells. Any data written to OUT will be appended (currently as a char) to the program's output. The value at OUT is always zero, so it is easy to write to. Input data (again, currently as chars) appears at IN. When the program begins, the first character in the input shows up at IN. If the program writes a value to IN, that is interpreted as an index into the input, and the corresponding character will show up at IN (or ==-1== if out of range). _Negative_ numbers written to IN have a very different effect -- namely, ending the program. If x is written to IN, -1-x will be the program's exit code. (This is to allow a zero exit code, since writing zero to IN will seek to the beginning of the input rather than exiting.)
+
+Armed with this one simple instruction and a plan for the machine[1], I set out to implement the SUBLEQ instruction in Clojure. I came up with the rather straightforward function below:
+<script src="http://gist.github.com/119805.js"></script>
+This function needs the current state of the memory, the operands (or it will fetch them from memory according to the <acronym title="Instruction Pointer">IP</acronym>), and the locations of the special in/out cells. The machine's registers ("regs") are just the IP and markers that are present if the input or ouput cell was just written.
+
+Let's test this function a little bit.
+<script src="http://gist.github.com/119813.js"></script>
+
+Since this is a Clojure blog, and not a SUBLEQ blog, I'll talk a little bit about the implementation. This is a true function, as its return values depend only on its inputs and it has no side effects. It takes in the state of the world (the <tt>mem</tt> vector and registers) and returns the world with changes applied. Other nice Clojure features I've used are function arity overloading, which allows <tt>subleq</tt> to pluck A, B, and C out of <tt>mem</tt> and call itself right back; and the <tt>assoc</tt> function, which makes transforming maps and vectors very easy.
+
+Convinced that we can successfully simulate a SUBLEQ instruction, what should be implemented next? Well, the machine can only SUBLEQ over and over again, so to complete the simulation we just need to hook this function up to itself, along with the aforementioned I/O magic. I found a bad bug[2] while making this gist, so if you spot any more, or if my explanatory comments are insufficient, please let me know in the comments below.
+<script src="http://gist.github.com/119815.js"></script>
+
+This function is a little more substantial than the last. I said it was a simple matter of hooking <tt>subleq</tt> up to itself, but apparently there is some "magic":http://www.quotationspage.com/quote/776.html going on. <tt>drive-subleq</tt> is implemented with a big ol' old-fashioned loop, although it could conceivably be made lazy -- I'll have to look into that in the future. The loop's first action is to call <tt>subleq</tt>, and then immediately it checks to see whether the program is over. After that, if a character was written to OUT, it is appended to the running total of the program's output (note: <tt>(str a-string nil) ==> a-string</tt>). Finally, the memory is adjusted -- the output cell needs to be zero, and if something (positive) was written to IN, that needs to be honored by indexing into the input. The final let could be elided and the bindings inserted directly into the recur, but it is perhaps clearer this way.
+
+Let's step back for a second. What's possible at this point? The very lowest level of computer programming[3] -- directly in machine language. I set a rather modest goal for my first SUBLEQ program. It must
+* Output an A
+* Return 58
+
+Let's break this down into byte-size pieces. We'll need to
+
+* Output an A
+** Find a A in the memory.
+*** In "ASCII encoding":http://asciitable.com/, A is 65. So we can find it in the memory at <tt>(<acronym title="program length">len</acronym> + <acronym title="I/O cells">2</acronym> + <acronym title="A">65</acronym>) = (len + 67)</tt>[4].
+**** The above illustrates the hardest part of programming in this machine language (and perhaps points out a few drawbacks of my questionable design decisions) -- many of the instructions will depend on the length of the program, which cannot be determined until the program has been written.
+** Copy the A from memory to the output cell, which is at <tt>len</tt> (remember, memory is zero-indexed). We can copy it through the cell just after IN, which originally contains zero (we'll call this cell Z).
+* Return 58
+** Find a 59 in the memory. With the same reasoning, this should be located at <tt>(len + 61)</tt>. Call this place FIFTY-NINE.
+** Write -59 to IN.
+*** We can't write anything to IN before the -59, because that will either cause the value of IN to change, or the program to terminate.[5]
+*** Add the value at IN to the value at FIFTY-NINE (by going through Z). Now subtract the value at FIFTY-NINE from IN. This is enough to set IN to -59: say IN contained some value x, and FIFTY-NINE obviously contained 59. After the addition, IN still contains x and FIFTY-NINE contains 59+x. Then we set IN to x&#45;(59+x), which is -59.
+
+Here it is in SUBLEQ assembly (which is just pseudocode right now, as we do not have an assembler):
+<pre>    (drive-subleq [(+ len 67) Z (inc ?), Z OUT (inc ?), Z Z (inc ?),
+                        IN Z (inc ?), Z (+ len 61) (inc ?), (+ len 61) IN (inc ?)] "")</pre>
+I'm using ? as a marker for the current location, so that (inc ?) refers to the memory cell after the cell that (inc ?) is stored in, which is the location of the next instruction.
+Now that the program is written, we can count <tt>len</tt> (it's 18) and fill in the labels.
+<pre>                       0      1    2     3  4     5     6  7   8
+    (drive-subleq [(+ len 67) Z (inc ?), Z OUT (inc ?), Z Z (inc ?),
+                        9  10   11    12     13      14          15    16    17
+                        IN Z (inc ?), Z (+ len 61) (inc ?), (+ len 61) IN (inc ?)] "")
+    (drive-subleq [    85     20   3,    20 18    6,    20 20  9,
+                        19 20   12,   20    79       15,        79     19    18  ] "")</pre>
+Note that this program does not use any conditional jumps or indirect addressing. Still, it required a couple of tricks and an essentially two-pass assembly (which we did entirely by hand).
+
+Let's review what's been accomplished so far. I have hopefully given a sufficient crash course in SUBLEQ assembly and explained my implementation of a simple OISC simulator in Clojure. This post is getting pretty long, so I'll leave discussion of the parser and assembler to another. Look forward to more discussion of the Clojure implementation, and a bit less about SUBLEQ (although I will devote a section to walking through a sample program or two). Feel free to play with the beast in its natural habitat, my "repository":http://github.com/durka/clj/tree/master/org/durka/sim.
+
+<hr>
+<small>
+
+fn0. I mean, seriously. I am just trying to talk about _negative numbers_! Stop crossing out my text! These footnotes are kind of neat, though it would be nice if they auto-numbered so I wouldn't have to zero-index.
+
+fn1. Secret: I wrote this function way before I had a design for the machine.
+
+fn2. So bad that I had to change my example program, because the off-by-one bug was actually in the simulator. Oops!
+
+fn3. Okay, except for the kind where you flip switches and connect jumpers.
+
+fn4. I like this scheme that I just invented, of abusing the &lt;acronym&gt; tag for metadata.
+
+fn5. At this point I noticed that the bug in the simulator from [2] was real, but the problem with the example program was more insidious, having to do with assuming a lack of input (so that IN would always be -1). The machine design is now in serious doubt, because writing to IN is even more complex than I realized.
+
+</small>
