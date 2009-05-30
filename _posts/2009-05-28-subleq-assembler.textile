@@ -18,8 +18,9 @@ The diagram below shows part of the machine's memory as a linear sequence of cel
 !/media/subleq.png!
 There is an interesting question of what to do with negative numbers; I have taken the convention from "Lawrence Woodman":http://techtinkering.com/articles/?id=26 that giving a negative number for an operand adds a layer of indirection: in other words, if A is negative, use Mem[Mem[|A|]] instead of Mem[A].
 <script src="http://gist.github.com/119642.js"></script>
-!/media/subleq_neg.png!
+
 In this last diagram I have given a negative value for the third operand, causing the conditional jump to the address in box C, rather than to the address C.
+!/media/subleq_neg.png!
 
 So you can see that this instruction is quite powerful. There are a few idioms that come out quickly:
 * For an unconditional jump, give the same address for A and B, because x - x is always zero.
@@ -30,7 +31,7 @@ So you can see that this instruction is quite powerful. There are a few idioms t
 ** If the target cell doesn't contain zero, this is also how you add numbers.
 * There are of course more -- I leave discovering them as an exercise to the reader.
 
-The first design decision is how to lay out the memory in this machine. I made some rather odd decisions that I may changes in the future, but for now this diagram shows the structure:
+The first design decision is how to lay out the memory in this machine. I made some rather odd decisions that I may change in the future, but for now this diagram shows the structure:
 !/media/machine.png!
 The assembled code of the program goes in the beginning of the memory. Immediately after that are the input and output ports, and after that the rest of the memory is filled with increasing integers. Now, IN and OUT are very special (almost magical) memory cells. Any data written to OUT will be appended (currently as a char) to the program's output. The value at OUT is always zero, so it is easy to write to. Input data (again, currently as chars) appears at IN. When the program begins, the first character in the input shows up at IN. If the program writes a value to IN, that is interpreted as an index into the input, and the corresponding character will show up at IN (or ==-1== if out of range). _Negative_ numbers written to IN have a very different effect -- namely, ending the program. If x is written to IN, -1-x will be the program's exit code. (This is to allow a zero exit code, since writing zero to IN will seek to the beginning of the input rather than exiting.)
 
@@ -68,7 +69,8 @@ Let's break this down into byte-size pieces. We'll need to
 Here it is in SUBLEQ assembly (which is just pseudocode right now, as we do not have an assembler):
 <pre>    (drive-subleq [(+ len 67) Z (inc ?), Z OUT (inc ?), Z Z (inc ?),
                         IN Z (inc ?), Z (+ len 61) (inc ?), (+ len 61) IN (inc ?)] "")</pre>
-I'm using ? as a marker for the current location, so that (inc ?) refers to the memory cell after the cell that (inc ?) is stored in, which is the location of the next instruction.
+I'm using ? as a marker for the current location, so that (inc ?) refers to the memory cell after the cell that (inc ?) is stored in, which is the location of the next instruction. In the instructions on the first line, we transfer the character A from memory cell #67 to OUT. The next line adds IN to FIFTY-NINE (using Z as the middleman), and then subtracts FIFTY-NINE from IN to return 58.
+
 Now that the program is written, we can count <tt>len</tt> (it's 18) and fill in the labels.
 <pre>                       0      1    2     3  4     5     6  7   8
     (drive-subleq [(+ len 67) Z (inc ?), Z OUT (inc ?), Z Z (inc ?),
@@ -76,6 +78,9 @@ Now that the program is written, we can count <tt>len</tt> (it's 18) and fill in
                         IN Z (inc ?), Z (+ len 61) (inc ?), (+ len 61) IN (inc ?)] "")
     (drive-subleq [    85     20   3,    20 18    6,    20 20  9,
                         19 20   12,   20    79       15,        79     19    18  ] "")</pre>
+
+<script src="http://gist.github.com/120562.js"></script>
+
 Note that this program does not use any conditional jumps or indirect addressing. Still, it required a couple of tricks and an essentially two-pass assembly (which we did entirely by hand).
 
 Let's review what's been accomplished so far. I have hopefully given a sufficient crash course in SUBLEQ assembly and explained my implementation of a simple OISC simulator in Clojure. This post is getting pretty long, so I'll leave discussion of the parser and assembler to another. Look forward to more discussion of the Clojure implementation, and a bit less about SUBLEQ (although I will devote a section to walking through a sample program or two). Feel free to play with the beast in its natural habitat, my "repository":http://github.com/durka/clj/tree/master/org/durka/sim.
